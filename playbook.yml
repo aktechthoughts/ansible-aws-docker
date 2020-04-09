@@ -1,6 +1,6 @@
 ---
 - name: Install docker
-  hosts: RedHat
+  hosts: mt.aws
   gather_facts: No
   become: true
   vars_files:
