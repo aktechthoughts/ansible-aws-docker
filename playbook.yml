@@ -3,6 +3,9 @@
   hosts: mt.aws
   gather_facts: No
   become: true
+
+  vars:
+    ansible_python_interpreter: "/usr/bin/python2"
   vars_files:
     - vars/default.yml
 
