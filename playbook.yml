@@ -1,29 +1,55 @@
 ---
-- hosts: all
+- name: Install docker
+  hosts: RedHat
+  gather_facts: No
   become: true
   vars_files:
     - vars/default.yml
 
   tasks:
-    - name: Add Docker GPG apt Key
-      apt_key:
-        url: https://download.docker.com/linux/ubuntu/gpg
-        state: present
+      - name: Install yum utils
+      yum:
+        name: yum-utils
+        state: latest
+        
+    - name: Add Docker repo
+      get_url:
+        url: https://download.docker.com/linux/centos/docker-ce.repo
+        dest: /etc/yum.repos.d/docer-ce.repo
+      become: yes
 
-    - name: Add Docker Repository
-      apt_repository:
-        repo: deb https://download.docker.com/linux/ubuntu bionic stable
-        state: present
+    - name: Enable Docker Edge repo
+      ini_file:
+        dest: /etc/yum.repos.d/docer-ce.repo
+        section: 'docker-ce-edge'
+        option: enabled
+        value: 0
+      become: yes
 
-    - name: Update apt and install docker-ce
-      apt: update_cache=yes name=docker-ce state=latest
+    - name: Enable Docker Test repo
+      ini_file:
+        dest: /etc/yum.repos.d/docer-ce.repo
+        section: 'docker-ce-test'
+        option: enabled
+        value: 0
+      become: yes
 
-    - name: Install Docker Module for Python
-      pip:
+    - name: Install Docker
+      package:
+        name: docker-ce
+        state: latest
+      become: yes
+
+    - name: Start Docker service
+      service:
         name: docker
+        state: started
+        enabled: yes
+      become: yes
 
-    - name: Pull default Docker image
-      docker_image:
-        name: "{{ default_container_image }}"
-        source: pull
- 
+    - name: Add user ec2-user to docker group
+      user:
+        name: ec2-user
+        groups: docker
+        append: yes
+      become: yes
