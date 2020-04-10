@@ -31,9 +31,9 @@
 
     - name: Provision EC2 instance
       ec2:
-         key_name: abhishek-vpc
+         key_name: "{{ aws_sec_key }}"
          region: eu-central-1
-         instance_type: t2.micro
+         instance_type: "{{ aws_instance_type }}"
          image: "{{ aws_ami_id }}"
          wait: yes
          wait_timeout: 500
