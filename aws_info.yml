@@ -4,10 +4,10 @@
     - ./vars/vars.yml
   tasks:
 
-    - name: Get AWS Details
+    - name: Get EC2 Info
       ec2_instance_info:
         filters:
-          availability-zone: eu-central-1
+          "tag:Name": "SERVER0*"
       register: ec2_name
 
     - name: Get instance IP addresses.
@@ -15,3 +15,11 @@
         msg: "{{ item.0 }} | {{ item.1 }} | {{ item.2 }}"
       with_together:
         - "{{ ec2_name.instances | map(attribute='tags.Name') | list }}"
+        - "{{ ec2_name.instances[0].public_ip_address }}"
+        - "{{ ec2_name.instances[0].private_ip_address }}"
+
+    - name: Gather and Save Instance Info
+      set_fact:
+        Tag_Name: "{{ ec2_name.instances | map(attribute='tags.Name') | list }}"
+        Pub_IP: "{{ ec2_name.instances[0].public_ip_address }}"
+        Pvt_IP: "{{ ec2_name.instances[0].private_ip_address }}"
