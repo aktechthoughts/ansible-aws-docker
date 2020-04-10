@@ -1,10 +1,12 @@
 ---
 - hosts: localhost
+  vars_files:
+    - "./vars/var.yml"
   tasks:
-    - name: Setting up the Security Group for new instance
+    - name: Create Security Group for Ansible
       ec2_group:
-          name: Ansible_Security_Group_AWS
-          description: Allowing Traffic on port 22 and 80
+          name: Ansible_Security_Group
+          description: Allow Traffic on port 22 and 80
           region: eu-central-1
           rules:
            - proto: tcp
@@ -24,14 +26,14 @@
           rules_egress:
            - proto: all
              cidr_ip: 0.0.0.0/0
-          vpc_id: vpc-07db38c12d26359ac
+          vpc_id: {{aws_vpc_id}}
 
     - name: Provision EC2 instance
       ec2:
          key_name: abhishek-vpc
          region: eu-central-1
          instance_type: t2.micro
-         image: ami-050a22b7e0cf85dd0
+         image: {{aws_ami_id}}
          wait: yes
          wait_timeout: 500
          count: 1
@@ -42,9 +44,9 @@
               volume_type: gp2
               volume_size: 8
          monitoring: yes
-         vpc_subnet_id: subnet-042581e3da666d445
+         vpc_subnet_id: {{aws_sub_id}}
          assign_public_ip: yes
-         group: Ansible_Security_Group_AWS
+         group: Ansible_Security_Group
       register: ec2
 
     - name: Wait for SSH to come up
