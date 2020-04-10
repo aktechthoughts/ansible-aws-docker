@@ -5,3 +5,5 @@ aws_ami_id : ami-050a22b7e0cf85dd0
 aws_instance_type : t2.micro
 
 aws_sec_key : abhishek-vpc
+
+aws_region_id : eu-central-1a
