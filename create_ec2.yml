@@ -4,14 +4,12 @@
     - ./vars/vault.yml
     - ./vars/vars.yml
   tasks:
-  
+    - name: Get Info Block
+      ec2_instance_info:
+      register: ec2info 
 
-  - name: Get Info Block
-    ec2_instance_info:
-    register: ec2info 
-
-  - name: Print info
-    debug: var="ec2info.instances"
+    - name: Print info
+      debug: var="ec2info.instances"
 
 
     # - name: Create Security Group for Ansible
