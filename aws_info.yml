@@ -9,6 +9,8 @@
       ec2_group:
         aws_access_key: "{{aws_access_key}}"
         aws_secret_key: "{{aws_secret_key}}"
+        filters:
+          availability-zone: eu-central-1
       register: ec2_name
 
     - name: Get instance IP addresses.
