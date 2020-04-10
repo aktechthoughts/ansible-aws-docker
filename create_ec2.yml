@@ -1,7 +1,8 @@
 ---
 - hosts: localhost
   vars_files:
-    - "./vars/var.yml"
+    - ./vars/vault.yml
+    - ./vars/vars.yml
   tasks:
     - name: Create Security Group for Ansible
       ec2_group:
@@ -26,14 +27,14 @@
           rules_egress:
            - proto: all
              cidr_ip: 0.0.0.0/0
-          vpc_id: {{aws_vpc_id}}
+          vpc_id: "{{aws_vpc_id}}"
 
     - name: Provision EC2 instance
       ec2:
          key_name: abhishek-vpc
          region: eu-central-1
          instance_type: t2.micro
-         image: {{aws_ami_id}}
+         image: "{{aws_ami_id}}""
          wait: yes
          wait_timeout: 500
          count: 1
@@ -44,7 +45,7 @@
               volume_type: gp2
               volume_size: 8
          monitoring: yes
-         vpc_subnet_id: {{aws_sub_id}}
+         vpc_subnet_id: "{{aws_sub_id}}""
          assign_public_ip: yes
          group: Ansible_Security_Group
       register: ec2
