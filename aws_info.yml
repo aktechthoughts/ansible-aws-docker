@@ -1,0 +1,17 @@
+- hosts: localhost
+  connection: local
+  gather_facts: False
+  tasks:
+    - name: Get AWS Details
+      ec2_instance_info:
+        aws_access_key: "{{aws_access_key}}"
+        aws_secret_key: "{{aws_secret_key}}"
+      register: ec2_name
+      
+    - name: Get instance IP addresses.
+      debug:
+          msg: "{{ item.0 }} | {{ item.1 }} | {{ item.2 }}"
+      with_together:
+        - "{{ ec2_name.instances | map(attribute='tags.Name') | list }}"
+        - "{{ ec2_name.instances[0].public_ip_address }}"
+        - "{{ ec2_name.instances[0].private_ip_address }}"
