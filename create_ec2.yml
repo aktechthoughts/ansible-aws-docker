@@ -7,15 +7,12 @@
   
 
   - name: Get Info Block
-      block: 
-        - name: Get Running instance Info
-          
-          ec2_instance_info:
-          register: ec2info 
+    ec2_instance_info:
+    register: ec2info 
 
-        - name: Print info
-          debug: var="ec2info.instances"
- 
+  - name: Print info
+    debug: var="ec2info.instances"
+
 
     # - name: Create Security Group for Ansible
     #   ec2_group:
