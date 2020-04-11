@@ -1,13 +1,38 @@
 ---
 - hosts: localhost
   vars_files:
+    - ./vars/vault.yml
     - ./vars/vars.yml
   tasks:
 
     - name: get ec2 instance id by its name tag
       ec2_instance_facts:
+        aws_access_key: "{{ aws_access_key }}"
+        aws_secret_key: "{{ aws_secret_key }}"
         filters:
           availability-zone: eu-central-1a
       register: ec2_metadata
 
-    - debug: msg="{{ ec2_metadata.instances }}"
+
+    - name: get state
+      set_fact:
+        instance_id: "{{ item.instance_id }}"
+        public_ip: "{{ item.public_ip_address }}"
+      with_items: "{{ ec2_metadata.instances }}"
+      when: item.state.name == '{{ 'running' }}'
+
+    - debug:
+        msg: "{{ public_ip if public_ip else  instance_id }}"
+
+    - name: Add tag to Instace(s)
+      ec2_tag:
+        aws_access_key: "{{ aws_access_key }}"
+        aws_secret_key: "{{ aws_secret_key }}"
+        resource: "{{ instance_id }}" 
+        region: "{{ aws_region_id }}" 
+        state: "present"
+      args:
+        tags:
+          Type: docker-machine
+
+    # - debug: msg="{{ ec2_metadata.instances[1].state }}"
