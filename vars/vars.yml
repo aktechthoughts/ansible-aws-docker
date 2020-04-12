@@ -10,3 +10,6 @@ aws_sec_key : abhishek-vpc
 IdFile : /home/abhishek/.aws/abhishek-vpc.pem
 
 default_jenkin_image : jenkins
+
+public_ip : ''
+instance_id : ''

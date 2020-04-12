@@ -3,12 +3,16 @@
   vars_files:
     - ./vars/vault.yml
     - ./vars/vars.yml
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+  
   tasks:
 
     - name: "Local Host : Get All ec2 Details"
       ec2_instance_facts:
         aws_access_key: "{{ aws_access_key }}"
         aws_secret_key: "{{ aws_secret_key }}"
+        region: "{{ aws_region_id }}"
         filters:
           availability-zone: eu-central-1a
       register: ec2_metadata
@@ -19,7 +23,7 @@
         instance_id: "{{ item.instance_id }}"
         public_ip: "{{ item.public_ip_address }}"
       with_items: "{{ ec2_metadata.instances }}"
-      when: item.state.name == '{{ 'running' }}'
+      when: item.state.name == 'running'
 
 
     - name: Create Security Group for Ansible if there is no inststance is running.
@@ -75,26 +79,33 @@
       register: ec2
       when: public_ip == ''
 
+    # - debug: msg="{{ ec2 }}"
+
+    - name: Wait for ssh to come up
+      wait_for: host="{{ public_ip if public_ip else  ec2.instances[0].public_ip }}" port=22 delay=10  timeout=300
+      
+  
 
     - name: "Local Host : Add tag to The ec2 Instace"
       ec2_tag:
         aws_access_key: "{{ aws_access_key }}"
         aws_secret_key: "{{ aws_secret_key }}"
-        resource: "{{ instance_id }}" 
+        resource: "{{ instance_id if instance_id else  ec2.instance_ids[0] }}" 
         region: "{{ aws_region_id }}" 
         state: "present"
       args:
         tags:
           Type: docker-machine
-      when: public_ip == ''    
 
+    - debug: msg="{{ public_ip if public_ip else  ec2.instances[0].public_ip }}"
 
     - name: "Local Host : Add ec2 as host for local ansible."
       add_host:
-        name: '{{ public_ip }}'
+        name: '{{ public_ip if public_ip else  ec2.instances[0].public_ip }}'
         ansible_user: 'ubuntu'
         instance_name: 'docker-machine'
         groups : dockers
+
 
 ## Add docker-ce on the remote host.
 ## Run a docker image identified by default_container_image
@@ -143,9 +154,26 @@
         name: docker   
         
     - name: "Remote Host : Pull default Docker image."
-      docker_image:
-       name: busybox
-       source: pull        
+      shell: |
+         docker pull busybox  
+
+
+
+## Terminate ec2 instance after docker is finished.
+
+
+- hosts: local
+  vars_files:
+    - ./vars/vault.yml
+    - ./vars/vars.yml
+  tasks:
+    - name: Terminate instances that were previously launched
+      ec2:
+        aws_access_key: "{{ aws_access_key }}"
+        aws_secret_key: "{{ aws_secret_key }}"
+        region: "{{ aws_region_id }}"
+        state: 'absent'
+        instance_ids: '{{ instance_id if instance_id else  ec2.instance_ids[0] }}'
 
     # - debug: msg="{{ ec2_metadata.instances[1].state }}"
     # - debug:
