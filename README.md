@@ -52,7 +52,6 @@ instance_id : ''
 sudo ansible-playbook create_ec2.yml --ask-vault-pass
 ```
 The command will ask the vault password which is created in the STEP1. The aws instance will be terminiated after docker is pulled.
-
 ## Authors
 
 * **Abhishek Kumar** - *Initial work* - [aktechthoughts](https://github.com/aktechthoughts)
@@ -64,6 +63,6 @@ This project is licensed under the MIT License.
 
 ## Acknowledgments
 
-* **Erika Heidi** - *Digital Ocean* - (https://www.digitalocean.com/community/cheatsheets/how-to-use-ansible-cheat-sheet-guide)
-* **C Tarwater** - *chrisanthropic.com* - (https://www.chrisanthropic.com/blog/2016/ansible-loops-and-aws-ec2-now-with-working-tags/)
+* **Erika Heidi** - *Digital Ocean* - [anisble-cheat-sheet](https://www.digitalocean.com/community/cheatsheets/how-to-use-ansible-cheat-sheet-guide)
+* **C Tarwater** - *chrisanthropic.com* - [ansible-ec2-aws](https://www.chrisanthropic.com/blog/2016/ansible-loops-and-aws-ec2-now-with-working-tags/)
 
