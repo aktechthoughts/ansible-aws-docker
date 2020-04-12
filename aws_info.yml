@@ -2,38 +2,59 @@
 ---
 - hosts: localhost
   vars_files:
-    - ./vars/vault.yml
+    # - ./vars/vault.yml
     - ./vars/vars.yml
   tasks:
 
+    - name: Get VPC details
+      shell: |
+        aws ec2 describe-vpcs --region {{ aws_region_id }}
+      register: get_vpc_id
+      changed_when: false 
+      
+    
+    - name: set vpc info
+      set_fact:
+        set_vpc_json: "{{ get_vpc_id.stdout | from_json }}"
+      changed_when: false
+   
+    - name: set vpc id
+      set_fact:
+        aws_vpc_id: "{{ set_vpc_json.Vpcs[0].VpcId }}"
+      when: set_vpc_json.Vpcs[0] is defined
+
+    - debug:
+        msg:
+         - "{{ aws_vpc_id }}"
+
+
     - name: get ec2 instance id by its name tag
       ec2_instance_facts:
-        aws_access_key: "{{ aws_access_key }}"
-        aws_secret_key: "{{ aws_secret_key }}"
+        # aws_access_key: "{{ aws_access_key }}"
+        # aws_secret_key: "{{ aws_secret_key }}"
         filters:
-          availability-zone: eu-central-1a
+          vpc-id: "{{ aws_vpc_id }}"
       register: ec2_metadata
 
 
     - name: get state
       set_fact:
+        vpc_id: "{{ item.vpc_id }}"
+        subnet_id: "{{ item.subnet_id }}"      
         instance_id: "{{ item.instance_id }}"
-        public_ip: "{{ item.public_ip_address }}"
+        state: "{{ item.state.name }}"
       with_items: "{{ ec2_metadata.instances }}"
-      when: item.state.name == '{{ 'running' }}'
+      when: ec2_metadata is defined
+    
+    - debug:
+        msg:
+         - "vpc_id:{{ vpc_id }}"
+         - "subnet_id:{{ subnet_id }}"
+         - "instance_id:{{ instance_id }}"
+         - "state:{{ state }}"
+      when: vpc_id is defined
 
     - debug:
-        msg: "{{ public_ip if public_ip else  instance_id }}"
-
-    - name: Add tag to Instace(s)
-      ec2_tag:
-        aws_access_key: "{{ aws_access_key }}"
-        aws_secret_key: "{{ aws_secret_key }}"
-        resource: "{{ instance_id }}" 
-        region: "{{ aws_region_id }}" 
-        state: "present"
-      args:
-        tags:
-          Type: docker-machine
-
-    # - debug: msg="{{ ec2_metadata.instances[1].state }}"
+        msg:
+         - "There is no instance running."
+      when: instance_id == ''

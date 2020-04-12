@@ -26,9 +26,9 @@
       when: item.state.name == 'running'
 
 
-    - name: Create Security Group for Ansible if there is no inststance is running.
+    - name: "Local Host : Create Security Group for Ansible if there is no inststance is running."
       ec2_group:
-          name: "Local Host : Ansible_Security_Group"
+          name: "Ansible_Security_Group"
           description: Allow Traffic on port 22 and 80
           region: "{{ aws_region_id }}"
           aws_access_key: "{{ aws_access_key }}"
@@ -72,6 +72,7 @@
             - device_name: /dev/xvda
               volume_type: gp2
               volume_size: 8
+              delete_on_termination: true
          monitoring: yes
          vpc_subnet_id: "{{ aws_sub_id }}"
          assign_public_ip: yes
