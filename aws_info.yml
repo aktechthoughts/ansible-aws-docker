@@ -1,3 +1,4 @@
+#Use this to get details of ec2 already running in the AWS
 ---
 - hosts: localhost
   vars_files:
