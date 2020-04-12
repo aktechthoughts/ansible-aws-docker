@@ -39,6 +39,11 @@
              from_port: 80
              to_port: 80
              cidr_ip: 0.0.0.0/0
+             
+           - proto: tcp
+             from_port: 8080
+             to_port: 8080
+             cidr_ip: 0.0.0.0/0
 
            - proto: tcp
              from_port: 22
@@ -125,11 +130,14 @@
    - name: "Remote Host : install python"
      raw: 'sudo apt-get -y install python3'
 
-  #  - name: enable python
-  #    shell: |
-  #     alias python='/usr/bin/python3'
+   - name: enable python
+     shell: |
+      alias python='/usr/bin/python3'
 
   tasks:
+
+    # - debug: msg="{{ terminate }}"
+
 
     - name: "Remote Host : Install required system packages"
       apt: name={{ item }} state=latest update_cache=yes
@@ -156,11 +164,11 @@
         
     - name: "Remote Host : Pull default Docker image."
       shell: |
-         docker pull busybox  
+         docker pull "{{ default_image }}"  
 
 
 
-## Terminate ec2 instance after docker is finished.
+# Terminate ec2 instance after docker is finished.
 
 
 - hosts: local
@@ -175,6 +183,7 @@
         region: "{{ aws_region_id }}"
         state: 'absent'
         instance_ids: '{{ instance_id if instance_id else  ec2.instance_ids[0] }}'
+      when: terminate == True  
 
     # - debug: msg="{{ ec2_metadata.instances[1].state }}"
     # - debug:
